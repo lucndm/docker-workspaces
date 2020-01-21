@@ -1,0 +1,7 @@
+version: '3'
+services: 
+    docker-workspaces:
+        build: .
+        environment: 
+            - DEBIAN_FRONTEND=noninteractive
+            - TZ=Asia/Ho_Chi_Minh
