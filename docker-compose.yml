@@ -2,6 +2,11 @@ version: '3'
 services: 
     docker-workspaces:
         build: .
+        container_name: docker-workspaces
+        command: tail -f /dev/null
+        volumes: 
+            - ./workspaces/:/home/coder/
+            - /var/run/docker.sock:/var/run/docker.sock
         environment: 
             - DEBIAN_FRONTEND=noninteractive
             - TZ=Asia/Ho_Chi_Minh
