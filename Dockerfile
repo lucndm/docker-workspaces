@@ -38,9 +38,18 @@ USER coder
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" \
     && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-COPY ./resources/.zshrc /home/coder/
-RUN mkdir -p /home/coder/workspaces
-RUN mkdir -p /home/coder/.local/share/code-server
-WORKDIR /home/coder/workspaces
+
+RUN sudo apt-get install -y --no-install-recommends  \
+    libbz2-dev libreadline-dev python-openssl libssl1.0-dev sqlite3
+ENV USER_HOME=/home/coder
+RUN curl https://pyenv.run | bash \
+    && $USER_HOME/.pyenv/bin/pyenv install 3.7.5 \
+    && $USER_HOME/.pyenv/bin/pyenv global 3.7.5
+COPY ./resources/.zshrc ${USER_HOME}
+# COPY ./resources/.zsh_history ${USER_HOME}
+
+RUN mkdir -p $USER_HOME/workspaces
+RUN mkdir -p $USER_HOME/.local/share/code-server
+WORKDIR $USER_HOME/workspaces
 VOLUME ["/home/coder/workspaces"]
 RUN sudo rm -rf /var/lib/apt/lists/*
