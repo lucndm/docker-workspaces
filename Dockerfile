@@ -47,7 +47,10 @@ RUN curl https://pyenv.run | bash \
     && $USER_HOME/.pyenv/bin/pyenv global 3.7.5
 COPY ./resources/.zshrc ${USER_HOME}
 # COPY ./resources/.zsh_history ${USER_HOME}
+RUN cd ~ && git clone https://github.com/minhlucnd/.tmux.git \
+    && ln -s -f .tmux/.tmux.conf &&  cp .tmux/.tmux.conf.local .
 
+RUN echo "set-option -g default-shell /bin/zsh" > ${USER_HOME}/.tmux.conf.local
 RUN mkdir -p $USER_HOME/workspaces
 RUN mkdir -p $USER_HOME/.local/share/code-server
 WORKDIR $USER_HOME/workspaces
