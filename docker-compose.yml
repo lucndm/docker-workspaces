@@ -5,8 +5,9 @@ services:
         container_name: docker-workspaces
         command: tail -f /dev/null
         volumes: 
-            - ./workspaces/:/home/coder/
+            - ./workspaces/:/home/coder/workspaces/
             - /var/run/docker.sock:/var/run/docker.sock
+        user: "1000:1000"
         environment: 
             - DEBIAN_FRONTEND=noninteractive
             - TZ=Asia/Ho_Chi_Minh

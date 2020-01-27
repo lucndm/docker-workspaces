@@ -22,7 +22,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
 RUN sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && sudo chmod +x /usr/local/bin/docker-compose
 
-RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tk-dev
+RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    tk-dev libncurses5-dev libncursesw5-dev
 
 RUN sudo apt-get install -y zsh build-essential \
     direnv docker-ce google-cloud-sdk
@@ -30,6 +31,16 @@ RUN sudo apt-get install -y zsh build-essential \
 RUN sudo apt autoremove -y python python3
 RUN adduser --gecos '' --disabled-password coder && \
 	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
-
-RUN sudo rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/tmux/tmux.git /tmp/tmux \
+    && cd /tmp/tmux && bash ./autogen.sh && ./configure && make && sudo make install \
+    && sudo cp tmux /usr/bin && sudo rm -rf /tmp/tmux
 USER coder
+RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" \
+    && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
+    && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+COPY ./resources/.zshrc /home/coder/
+RUN mkdir -p /home/coder/workspaces
+RUN mkdir -p /home/coder/.local/share/code-server
+WORKDIR /home/coder/workspaces
+VOLUME ["/home/coder/workspaces"]
+RUN sudo rm -rf /var/lib/apt/lists/*
