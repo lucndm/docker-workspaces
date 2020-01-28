@@ -40,19 +40,31 @@ RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
 RUN sudo apt-get install -y --no-install-recommends  \
-    libbz2-dev libreadline-dev python-openssl libssl1.0-dev sqlite3
+    libbz2-dev libreadline-dev python-openssl libssl1.0-dev sqlite3 iproute2
 ENV USER_HOME=/home/coder
 RUN curl https://pyenv.run | bash \
     && $USER_HOME/.pyenv/bin/pyenv install 3.7.5 \
     && $USER_HOME/.pyenv/bin/pyenv global 3.7.5
-COPY ./resources/.zshrc ${USER_HOME}
 # COPY ./resources/.zsh_history ${USER_HOME}
 RUN cd ~ && git clone https://github.com/minhlucnd/.tmux.git \
-    && ln -s -f .tmux/.tmux.conf &&  cp .tmux/.tmux.conf.local .
+    && ln -s -f .tmux/.tmux.conf
+COPY ./resources/.tmux.conf.local ${USER_HOME}
+COPY ./resources/.zshrc ${USER_HOME}
 
-RUN echo "set-option -g default-shell /bin/zsh" > ${USER_HOME}/.tmux.conf.local
+# RUN echo "set-option -g default-shell /bin/zsh" > ${USER_HOME}/.tmux.conf.local
 RUN mkdir -p $USER_HOME/workspaces
 RUN mkdir -p $USER_HOME/.local/share/code-server
 WORKDIR $USER_HOME/workspaces
 VOLUME ["/home/coder/workspaces"]
+# RUN sudo apt-get install -y openssh-server supervisor
+RUN sudo apt-get install -y openssh-server
+# RUN mkdir -p /var/log/supervisor 
+# COPY ./resources/supervisord.conf /etc/supervisor/conf.d/
+
 RUN sudo rm -rf /var/lib/apt/lists/*
+
+
+RUN mkdir -p ${USER_HOME}/.ssh/ && curl https://github.com/minhlucnd.keys >> ${USER_HOME}/.ssh/authorized_keys
+
+# CMD ["/usr/sbin/sshd", "-D"]
+# CMD ["/usr/bin/supervisord"]
