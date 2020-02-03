@@ -169,4 +169,8 @@ alias ll='ls -lah'
 alias ctop='docker run --rm -it --name=ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop:latest'
 export PATH="$HOME/anaconda3/bin/:$PATH"
 export PATH="$HOME/.pyenv/bin/:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
+
 alias rm='sudo rm'
+alias work-local='sshcode coder@localhost --skipsync "/home/coder/workspaces/" --ssh-flags "-p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"'
+alias work-remote='sshcode'

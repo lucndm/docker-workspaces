@@ -38,13 +38,13 @@ USER coder
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" \
     && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
+RUN sudo apt-get remove -y libssl-dev
 RUN sudo apt-get install -y --no-install-recommends  \
-    libbz2-dev libreadline-dev python-openssl libssl1.0-dev sqlite3 iproute2
+    libbz2-dev libreadline-dev python-openssl libssl1.0-dev libsqlite3-dev iproute2 libedit-dev libffi-dev
 ENV USER_HOME=/home/coder
 RUN curl https://pyenv.run | bash \
-    && $USER_HOME/.pyenv/bin/pyenv install 3.7.5 \
-    && $USER_HOME/.pyenv/bin/pyenv global 3.7.5
+    && $USER_HOME/.pyenv/bin/pyenv install 3.8.0 \
+    && $USER_HOME/.pyenv/bin/pyenv global 3.8.0
 # COPY ./resources/.zsh_history ${USER_HOME}
 RUN cd ~ && git clone https://github.com/minhlucnd/.tmux.git \
     && ln -s -f .tmux/.tmux.conf
@@ -63,3 +63,5 @@ RUN sudo apt-get install -y openssh-server rsync
 RUN mkdir -p ${USER_HOME}/.ssh/ && curl https://github.com/minhlucnd.keys >> ${USER_HOME}/.ssh/authorized_keys
 RUN sudo rm -rf /var/lib/apt/lists/*
 RUN sudo usermod -aG docker coder
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+RUN ${USER_HOME}/.pyenv/shims/pip install pip --upgrade
