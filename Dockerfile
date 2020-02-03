@@ -57,14 +57,9 @@ RUN mkdir -p $USER_HOME/.local/share/code-server
 WORKDIR $USER_HOME/workspaces
 VOLUME ["/home/coder/workspaces"]
 # RUN sudo apt-get install -y openssh-server supervisor
-RUN sudo apt-get install -y openssh-server
+RUN sudo apt-get install -y openssh-server rsync
 # RUN mkdir -p /var/log/supervisor 
 # COPY ./resources/supervisord.conf /etc/supervisor/conf.d/
-
-RUN sudo rm -rf /var/lib/apt/lists/*
-
-
 RUN mkdir -p ${USER_HOME}/.ssh/ && curl https://github.com/minhlucnd.keys >> ${USER_HOME}/.ssh/authorized_keys
-
-# CMD ["/usr/sbin/sshd", "-D"]
-# CMD ["/usr/bin/supervisord"]
+RUN sudo rm -rf /var/lib/apt/lists/*
+RUN sudo usermod -aG docker coder

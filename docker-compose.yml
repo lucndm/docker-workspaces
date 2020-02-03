@@ -3,12 +3,10 @@ services:
     docker-workspaces:
         build: .
         container_name: docker-workspaces
-        # command: tail -f /dev/null
-        command: bash -c " sudo service ssh start && tail -f /dev/null"
-        # command: ["/usr/sbin/sshd", "-D"]
-        # network_mode: host
+        # command: bash -c " sudo service ssh start && tail -f /dev/null"
+        command: bash -c "sudo service ssh start && tail -f /dev/null"
         ports: 
-            - "22:22"
+            - "2222:22"
         volumes: 
             - ./workspaces/:/home/coder/workspaces/
             - /var/run/docker.sock:/var/run/docker.sock
