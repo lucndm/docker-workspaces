@@ -22,6 +22,8 @@ after_script:
 
 script:
     - sudo bash ./test.sh
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - sudo bash ./build.sh
     
 addons:
     apt:
