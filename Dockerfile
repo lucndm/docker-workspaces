@@ -1,5 +1,6 @@
 FROM ubuntu:18.04
-
+ENV USER lucndm 
+ENV PYTHON_VERSION_DEFAULT 3.8.0
 RUN apt-get update && apt-get install -y \
     curl wget openssl git sudo locales net-tools gnupg gnupg2 apt-transport-https ca-certificates software-properties-common
 
@@ -23,45 +24,46 @@ RUN sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/doc
     && sudo chmod +x /usr/local/bin/docker-compose
 
 RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    tk-dev libncurses5-dev libncursesw5-dev
-
-RUN sudo apt-get install -y zsh build-essential \
+    tk-dev libncurses5-dev libncursesw5-dev zsh build-essential \
     direnv docker-ce google-cloud-sdk
 
 RUN sudo apt autoremove -y python python3
-RUN adduser --gecos '' --disabled-password coder && \
-	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+
+RUN adduser --gecos '' --disabled-password $USER && \
+	echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 RUN git clone https://github.com/tmux/tmux.git /tmp/tmux \
     && cd /tmp/tmux && bash ./autogen.sh && ./configure && make && sudo make install \
     && sudo cp tmux /usr/bin && sudo rm -rf /tmp/tmux
-USER coder
+USER $USER
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" \
     && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 RUN sudo apt-get remove -y libssl-dev
 RUN sudo apt-get install -y --no-install-recommends  \
-    libbz2-dev libreadline-dev python-openssl libssl1.0-dev libsqlite3-dev iproute2 libedit-dev libffi-dev
-ENV USER_HOME=/home/coder
+    libbz2-dev libreadline-dev python-openssl libssl1.0-dev libsqlite3-dev iproute2 libedit-dev libffi-dev openssh-server rsync
+ENV USER_HOME=/home/$USER
 RUN curl https://pyenv.run | bash \
-    && $USER_HOME/.pyenv/bin/pyenv install 3.8.0 \
-    && $USER_HOME/.pyenv/bin/pyenv global 3.8.0
+    && $USER_HOME/.pyenv/bin/pyenv install ${PYTHON_VERSION_DEFAULT} \
+    && $USER_HOME/.pyenv/bin/pyenv global ${PYTHON_VERSION_DEFAULT}
 # COPY ./resources/.zsh_history ${USER_HOME}
 RUN cd ~ && git clone https://github.com/minhlucnd/.tmux.git \
     && ln -s -f .tmux/.tmux.conf
-COPY ./resources/.tmux.conf.local ${USER_HOME}
-COPY ./resources/.zshrc ${USER_HOME}
-
-# RUN echo "set-option -g default-shell /bin/zsh" > ${USER_HOME}/.tmux.conf.local
+ADD ./dotfiles/.zshrc ${USER_HOME}
+ADD ./dotfiles/.tmux.conf.local ${USER_HOME} 
+RUN sudo chown ${USER}:${USER} $USER_HOME/.tmux.conf.local ${USER_HOME}/.zshrc
 RUN mkdir -p $USER_HOME/workspaces
 RUN mkdir -p $USER_HOME/.local/share/code-server
 WORKDIR $USER_HOME/workspaces
-VOLUME ["/home/coder/workspaces"]
-# RUN sudo apt-get install -y openssh-server supervisor
-RUN sudo apt-get install -y openssh-server rsync
+VOLUME ["/home/$USER/workspaces"]
 # RUN mkdir -p /var/log/supervisor 
 # COPY ./resources/supervisord.conf /etc/supervisor/conf.d/
-RUN mkdir -p ${USER_HOME}/.ssh/ && curl https://github.com/minhlucnd.keys >> ${USER_HOME}/.ssh/authorized_keys
+RUN mkdir -p ${USER_HOME}/.ssh/
 RUN sudo rm -rf /var/lib/apt/lists/*
-RUN sudo usermod -aG docker coder
+RUN sudo usermod -aG docker $USER
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-RUN ${USER_HOME}/.pyenv/shims/pip install pip --upgrade
+COPY ./requirements-dev.txt /tmp/requirements-dev.txt
+RUN ${USER_HOME}/.pyenv/shims/pip install -r /tmp/requirements-dev.txt && sudo rm -rf /tmp/requirements-dev.txt
+COPY fabfile.py fabfile.py
+COPY ./tests tests
+# RUN python fabfile.py
+RUN ${USER_HOME}/.pyenv/versions/${PYTHON_VERSION_DEFAULT}/bin/fab bootstrap && sudo rm -rf tests 

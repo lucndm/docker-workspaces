@@ -1,0 +1,11 @@
+# Testing
+pytest
+pytest-cov
+coverage
+mock
+
+# Utils
+Fabric
+flake8
+colorama
+tox

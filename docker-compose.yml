@@ -1,15 +1,19 @@
 version: '3'
 services: 
-    docker-workspaces:
+    code-server:
         build: .
         container_name: docker-workspaces
         # command: bash -c " sudo service ssh start && tail -f /dev/null"
         command: bash -c "sudo service ssh start && tail -f /dev/null"
-        ports: 
+        ports:  
             - "2222:22"
         volumes: 
-            - ./workspaces/:/home/coder/workspaces/
+            - ./workspaces/:${USER_HOME}/workspaces/
             - /var/run/docker.sock:/var/run/docker.sock
+            - ~/.config/Code/User:${USER_HOME}/.local/share/code-server/User
+            - ~/.vscode/extensions:${USER_HOME}/.local/share/code-server/extensions
+            - ~/.zsh_history:${USER_HOME}/.zsh_history
+            - ~/.ssh:${USER_HOME}/.ssh:ro
         user: "1000:1000"
         environment: 
             - DEBIAN_FRONTEND=noninteractive
