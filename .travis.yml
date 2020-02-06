@@ -5,26 +5,21 @@ sudo: required
 services:
     - docker
 
-env:
-    - DOCKER_COMPOSE_VERSION=1.25.3
-
-before_install:
-    - sudo rm /usr/local/bin/docker-compose
-    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-    - chmod +x docker-compose
-    - sudo mv docker-compose /usr/local/bin
-
-
+# env:
+#     - DOCKER_COMPOSE_VERSION=1.25.3
+#     - IMAGE_NAME=minhluc/docker-workspaces
+#     - IMAGE_BY_DATE=$IMAGE_NAME:$(date +"%Y%m%d")
 before_script:
-    - docker-compose up -d --build
-after_script:
-    - docker-compose down
-
-script:
-    - sudo bash ./test.sh
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - sudo bash ./build.sh
-    
+#     - docker build -t $IMAGE_NAME:latest .
+# after_script:
+#     - docker push $IMAGE_NAME:latest
+#     - docker tag $IMAGE_NAME:latest $IMAGE_BY_DATE
+#     - docker push $IMAGE_BY_DATE
+script:
+    # - docker --rm run $IMAGE_NAME bash -c "echo "done""
+    - bash ./build.sh
+
 addons:
     apt:
         packages:
