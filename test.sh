@@ -1,2 +1,2 @@
 #!/bin/sh
-docker-compose exec docker-workspaces bash -c "echo "OKEY""
+docker-compose exec code-server bash -c "echo "OKEY""

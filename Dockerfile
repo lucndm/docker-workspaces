@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 ENV USER lucndm 
-ENV PYTHON_VERSION_DEFAULT 3.8.0
+ENV PYTHON_VERSION_DEFAULT 3.6.0
 RUN apt-get update && apt-get install -y \
     curl wget openssl git sudo locales net-tools gnupg gnupg2 apt-transport-https ca-certificates software-properties-common
 
@@ -40,7 +40,7 @@ RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
     && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 RUN sudo apt-get remove -y libssl-dev
 RUN sudo apt-get install -y --no-install-recommends  \
-    libbz2-dev libreadline-dev python-openssl libssl1.0-dev libsqlite3-dev iproute2 libedit-dev libffi-dev openssh-server rsync
+    libbz2-dev libreadline-dev python-openssl libssl1.0-dev libsqlite3-dev iproute2 libedit-dev libffi-dev openssh-server rsync telnet
 ENV USER_HOME=/home/$USER
 RUN curl https://pyenv.run | bash \
     && $USER_HOME/.pyenv/bin/pyenv install ${PYTHON_VERSION_DEFAULT} \
@@ -58,7 +58,6 @@ VOLUME ["/home/$USER/workspaces"]
 # RUN mkdir -p /var/log/supervisor 
 # COPY ./resources/supervisord.conf /etc/supervisor/conf.d/
 RUN mkdir -p ${USER_HOME}/.ssh/
-RUN sudo rm -rf /var/lib/apt/lists/*
 RUN sudo usermod -aG docker $USER
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 COPY ./requirements-dev.txt /tmp/requirements-dev.txt
@@ -67,3 +66,4 @@ COPY fabfile.py fabfile.py
 COPY ./tests tests
 # RUN python fabfile.py
 RUN ${USER_HOME}/.pyenv/versions/${PYTHON_VERSION_DEFAULT}/bin/fab bootstrap && sudo rm -rf tests 
+RUN sudo rm -rf /var/lib/apt/lists/*
